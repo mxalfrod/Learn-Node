@@ -22,12 +22,15 @@ exports.getStores = async (req,res) =>{
 };
 
 exports.editStore = async (req, res)=>{
+  
     const store = await Store.findOne({_id: req.params.id});
     //res.json(store);
     res.render('editStore',{title:`Edit ${store.name}`,store});
 };
 
 exports.updateStore = async (req,res)=> {
+      //set the location data to be a point
+      req.body.location.type =  'Point';
 const store = await Store.findByIdAndUpdate({_id:req.params.id}, req.body,{
     new:true, // return the new store instead of the old one
     runValidators:true
