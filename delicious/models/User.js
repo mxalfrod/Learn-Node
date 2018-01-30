@@ -20,8 +20,16 @@ const userSchema = new Schema({
         type:String,
         required:'Please Supply a name',
         trim: true
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date
 });
+
+userSchema.virtual('gravatar').get(function(){
+    const hash = md5(this.email);
+    return `//gravatar.com/avatar/${hash}?s=200`;
+});
+
 userSchema.plugin(passpostLocalMongoose,{usernameField:'email'});
 userSchema.plugin(mongodbErrorHanlder);
 module.exports = mongoose.model('User', userSchema);
