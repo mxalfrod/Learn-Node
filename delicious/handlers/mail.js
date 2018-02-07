@@ -15,17 +15,20 @@ const transport = nodemailer.createTransport({
 
 const generateHMTL = (filename,options = {})=>{
     const html = pug.renderFile(`${__dirname}/../views/email/${filename}.pug`,options);
-    return html;
+
+    const inlined = juice(html);
+    return inlined;
 };
 
 exports.send = async (options) =>{
     const html = generateHMTL(options.filename, options);
+    const text = htmlToText.fromString(html);
     const mailOptions = {
         from: `Alfonso Rodriguez <alfonso.rodriguez@mailinator.com>`,
         to: options.user.email,
         subject: options.subject,
         html,
-        text: 'This will also be filled in later'
+        text
     };
     const sendMail = promisify(transport.sendMail, transport);
     return sendMail(mailOptions);
