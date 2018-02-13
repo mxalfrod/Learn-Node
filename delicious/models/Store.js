@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const sanitizeHtml = require('sanitize-html');
 mongoose.Promise = global.Promise;
 const slug = require('slugs');
 
@@ -45,12 +46,18 @@ storeSchema.index({
     name: 'text',
     description: 'text'
 });
+storeSchema.index({
+    location:'2dsphere'
+});
 
 storeSchema.pre('save', async function (next){
+    console.log("pre save");
     if(!this.isModified('name')){
         next();// skip it
         return;// stop this function from running
     }
+    this.name = sanitizeHtml(this.name);
+    console.log(this.name);
     this.slug = slug(this.name);
     // find other stores that have a similar slog
     const slugRegex = new RegExp(`^(${this.slug})((-[0-9]*$)?)$`,'i');
@@ -60,6 +67,10 @@ storeSchema.pre('save', async function (next){
     }
     next();
     //TODO make more resiliant so slugs are unique
+});
+storeSchema.pre('validate', async function (next){
+    this.name = sanitizeHtml(this.name);
+    next();
 });
 storeSchema.statics.getTagsList  = function(){
     return this.aggregate([

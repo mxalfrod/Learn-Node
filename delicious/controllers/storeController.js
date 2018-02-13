@@ -3,6 +3,7 @@ const Store = mongoose.model('Store');
 const multer = require('multer');
 const jimp = require('jimp');
 const uuid = require('uuid');
+const sanitizeHtml = require('sanitize-html');
 
 const multerOptions = {
     storage: multer.memoryStorage(),
@@ -80,6 +81,8 @@ exports.displayStore = async(req,res,next)=>{
 exports.updateStore = async (req,res)=> {
       //set the location data to be a point
       req.body.location.type =  'Point';
+    //const store = await (new Store(req.body)).save();
+    req.body.name =sanitizeHtml(req.body.name);
 const store = await Store.findByIdAndUpdate({_id:req.params.id}, req.body,{
     new:true, // return the new store instead of the old one
     runValidators:true
@@ -114,3 +117,24 @@ exports.searchStores = async (req,res)=>{
     .limit(5);
     res.json(stores);
 };
+exports.mapStores = async (req,res)=> {
+    const coordinates = [req.query.lng, req.query.lat].map(parseFloat);
+     const q = {
+         location:{
+             $near:{
+                 $geometry:{
+                     type: 'Point',
+                     coordinates
+                 },
+                 $maxDistance: 10000 //10 km
+             }
+         }
+     };
+     const stores = await Store.find(q).select('slug name description location').limit(10);
+    res.json(stores);
+
+    //res.json(coordinates);
+};
+exports.mapPage = (req,res) => {
+    res.render('map',{title:'Map'});
+}
