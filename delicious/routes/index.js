@@ -6,7 +6,10 @@ const userController = require('../controllers/userController');
 
 const authController = require('../controllers/authController');
 
+const reviewController = require('../controllers/reviewController');
+
 const {catchErrors} = require('../handlers/errorHandlers');
+
 
 router.get('/', catchErrors(storeController.getStores));
 router.get('/stores', catchErrors(storeController.getStores));
@@ -49,6 +52,9 @@ router.post('/account/reset/:token',
 );
 router.get('/map', storeController.mapPage);
 router.get('/hearts',catchErrors(storeController.heartStores));
+router.post('/reviews/:id',catchErrors(reviewController.addReview));
+router.get("/top", catchErrors(storeController.getTopStores));
+
 /*
  API
  */

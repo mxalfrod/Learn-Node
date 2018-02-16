@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const Store = mongoose.model('Store');
 const User = mongoose.model('User');
+const Review = mongoose.model('Review');
 const multer = require('multer');
 const jimp = require('jimp');
 const uuid = require('uuid');
 const sanitizeHtml = require('sanitize-html');
-
 
 const multerOptions = {
     storage: multer.memoryStorage(),
@@ -54,7 +54,6 @@ exports.createStore= async (req,res) => {
 
 exports.getStores = async (req,res) =>{
     const stores = await Store.find();
-    console.log(stores);
     res.render('stores',{title:'Stores',stores});
 };
 exports.heartStores = async (req,res)=>{
@@ -79,7 +78,9 @@ exports.editStore = async (req, res)=>{
 };
 
 exports.displayStore = async(req,res,next)=>{
-    const store = await Store.findOne({ slug: req.params.slug}).populate('author');
+    const store = await Store.findOne({ slug: req.params.slug}).populate('author reviews');
+    //const reviews = await Review.find({_id:store.id}).populate('author');
+    //console.log(reviews);
     if(!store){
         next();
         return;
@@ -153,3 +154,8 @@ exports.heartStore = async (req,res)=>{
     const user = await User.findByIdAndUpdate(req.user._id,{[operator]:{hearts:req.params.id}},{new:true});
     res.json(user);
 };
+exports.getTopStores = async(req,res) =>{
+    const stores = await Store.getTopStores();
+    //res.json(stores);
+    res.render('topStores', {stores,title:'Top Stores!'});
+}
